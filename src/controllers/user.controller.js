@@ -404,4 +404,5 @@ export {
   updateEmail,
   updateUserAvatar,
   updateUserCoverImage,
+  getUserChannelProfile,
 };
