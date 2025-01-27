@@ -18,8 +18,10 @@ app.use(cookieParser()); // to parse cookies securely from server to client
 
 // route imports
 import userRoutes from "./routes/user.routes.js";
+import subscriptionRoutes from "./routes/subscription.routes.js";
 
 // route middlewares
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/subscriptions", subscriptionRoutes);
 
 export { app };
