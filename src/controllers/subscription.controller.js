@@ -7,9 +7,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 const toggleSubscription = asyncHandler(async (req, res) => {
   const { channel } = req.params; // The channel ID to subscribe or unsubscribe to
 
-  if (!channel) {
-    throw new ApiError(400, "Channel ID is required");
-  }
+  if (!channel.trim()) throw new ApiError(400, "Channel ID is required");
 
   const pastState = await User.findOne({
     $and: [{ subscriber: req.user._id }, { channel }],
@@ -52,4 +50,38 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, deleteRes, "Channel unsubscribed successfully"));
 });
 
-export { toggleSubscription };
+const getUserChannelSubscribers = asyncHandler(async (req, res) => {
+  const { channelId } = req.params;
+
+  if (!channelId.trim()) throw new ApiError(400, "Channel ID is required");
+
+  const subscribers = Subscription.aggregate([
+    {
+      $match: { channel: channelId.toLowerCase() },
+    },
+    {
+      $addField: {
+        subscriber: "$subscriber",
+      },
+    },
+    {
+      $projection: {
+        subscriber: 1,
+      },
+    },
+  ]);
+
+  if (!subscribers?.length) throw new ApiError(404, "channel does not exist");
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        subscribers[0],
+        "Channel Subscriber List fetched successfully"
+      )
+    );
+});
+
+export { toggleSubscription, getUserChannelSubscribers };
