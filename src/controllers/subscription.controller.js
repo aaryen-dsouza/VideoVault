@@ -79,13 +79,40 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         subscribers,
-        "Channel Subscriber List fetched successfully"
+        "User Subscribers List fetched successfully"
       )
     );
 });
 
 const getSubscribedChannels = asyncHandler(async (req, res) => {
   const { subscriberId } = req.params;
+
+  if (!subscriberId?.trim())
+    throw new ApiError(400, "Subscriber ID is required");
+
+  const channels = await Subscription.aggregate([
+    {
+      $match: { subscriber: subscriberId.toLowerCase() },
+    },
+    {
+      $addFields: {
+        channel: "$channel",
+      },
+    },
+    {
+      $project: {
+        channel: 1,
+      },
+    },
+  ]);
+
+  if (!channels?.length) throw new ApiError(404, "Subscriber does not exist");
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, channels, "User channel List fetched successfully")
+    );
 });
 
-export { toggleSubscription, getUserChannelSubscribers };
+export { toggleSubscription, getUserChannelSubscribers, getSubscribedChannels };
