@@ -106,7 +106,8 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     },
   ]);
 
-  if (!channels?.length) throw new ApiError(404, "Subscriber does not exist");
+  if (!channels?.length)
+    throw new ApiError(404, "No channels found for the subscriber");
 
   return res
     .status(200)
